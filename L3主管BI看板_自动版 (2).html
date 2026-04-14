@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TW 运营中心 · L3 主管 BI 看板</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#0a0f1e;--s1:#0d1426;--s2:#111a30;--s3:#162038;
+  --bd:#1e2f50;--bd2:#2a4070;
+  --blue:#4d9eff;--blue2:#2d7edf;--green:#22d98a;
+  --yellow:#f5c842;--red:#f05252;--orange:#f5923a;
+  --teal:#10d4f0;--purple:#a57aff;
+  --t1:#e0eeff;--t2:#7aa0c8;--t3:#3a5878;
+  --r:10px;--r2:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{background:var(--bg);background-image:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(30,60,120,.35) 0%,transparent 60%),radial-gradient(ellipse 60% 50% at 80% 80%,rgba(20,40,100,.25) 0%,transparent 60%);background-attachment:fixed;color:var(--t1);font-family:'DM Sans','PingFang SC','Microsoft YaHei',system-ui,sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:200;height:54px;background:rgba(10,15,30,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 24px;gap:3px;overflow-x:auto}
+.nav-brand{font-size:13px;font-weight:600;color:var(--t1);margin-right:14px;flex-shrink:0;display:flex;align-items:center;gap:8px}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ndiv{width:1px;height:16px;background:var(--bd);margin:0 5px;flex-shrink:0}
+.nav-btn{font-size:12px;color:var(--t3);padding:5px 12px;border-radius:7px;cursor:pointer;flex-shrink:0;border:none;background:transparent;font-family:inherit;transition:all .15s;white-space:nowrap}
+.nav-btn:hover{color:var(--t1);background:var(--s2)}.nav-btn.active{color:var(--blue);background:rgba(77,158,255,.1)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t3);flex-shrink:0}
+.sync-btn{padding:5px 13px;border-radius:7px;border:1px solid rgba(34,217,138,.3);background:rgba(34,217,138,.08);color:var(--green);font-size:12px;font-family:inherit;cursor:pointer;font-weight:600;transition:all .15s;white-space:nowrap}
+.sync-btn:hover{background:rgba(34,217,138,.16)}.sync-btn.spinning{opacity:.6;cursor:wait}
+.last-sync{font-size:11px;color:var(--t3)}
+select{background:var(--s2);border:1px solid var(--bd);color:var(--t2);border-radius:7px;padding:4px 10px;font-size:12px;font-family:inherit;cursor:pointer}
+
+/* LAYOUT */
+.wrap{max-width:1060px;margin:0 auto;padding:32px 24px 100px}
+.panel{display:none}.panel.active{display:block}
+.ph{margin-bottom:24px}
+.ph-eyebrow{font-size:10px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.ph-eyebrow::before{content:'';width:16px;height:1.5px;background:var(--blue);display:block}
+.ph-title{font-size:22px;font-weight:600;letter-spacing:-.4px;color:var(--t1);margin-bottom:3px}
+.ph-sub{font-size:12px;color:var(--t3)}
+.sec{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);margin:24px 0 10px;display:flex;align-items:center;gap:10px}
+.sec::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+/* STATUS */
+.status-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.status-card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:10px}
+.status-label{font-size:11px;color:var(--t3)}.status-val{font-size:13px;font-weight:600;color:var(--t1)}
+.s-ok{color:var(--green)}.s-err{color:var(--red)}.s-wait{color:var(--yellow)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.metric{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;position:relative;overflow:hidden;transition:border-color .2s}
+.metric:hover{border-color:var(--bd2)}
+.ma{position:absolute;top:0;left:0;right:0;height:2px}
+.ma-b{background:linear-gradient(90deg,var(--blue),transparent)}.ma-g{background:linear-gradient(90deg,var(--green),transparent)}
+.ma-y{background:linear-gradient(90deg,var(--yellow),transparent)}.ma-p{background:linear-gradient(90deg,var(--purple),transparent)}
+.metric-lbl{font-size:11px;color:var(--t3);margin-bottom:5px;letter-spacing:.3px}
+.metric-val{font-size:22px;font-weight:600;color:var(--t1);font-family:'DM Mono',monospace;letter-spacing:-1px;line-height:1}
+.metric-val.up{color:var(--green)}.metric-val.dn{color:var(--red)}.metric-val.warn{color:var(--yellow)}
+.metric-sub{font-size:11px;color:var(--t3);margin-top:4px}
+
+/* TEAM ACCORDION */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.team-acc{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;transition:border-color .2s}
+.team-acc:hover{border-color:var(--bd2)}
+.team-acc-head{padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;user-select:none}
+.team-acc-head:hover{background:rgba(255,255,255,.02)}
+.ta-left{display:flex;align-items:center;gap:10px}
+.ta-name{font-size:13px;font-weight:600;color:var(--t1)}
+.ta-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600}
+.ta-b1{background:rgba(77,158,255,.12);color:var(--blue);border:1px solid rgba(77,158,255,.2)}
+.ta-b2{background:rgba(34,217,138,.1);color:var(--green);border:1px solid rgba(34,217,138,.2)}
+.ta-b3{background:rgba(165,122,255,.1);color:var(--purple);border:1px solid rgba(165,122,255,.2)}
+.ta-total{font-size:18px;font-weight:600;font-family:'DM Mono',monospace;color:var(--t1)}
+.ta-arrow{font-size:12px;color:var(--t3);transition:transform .2s}
+.team-acc.open .ta-arrow{transform:rotate(180deg)}
+.team-acc-summary{padding:0 16px 12px;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.ts-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0;border-bottom:1px solid var(--bd)}
+.ts-row:last-child{border-bottom:none}
+.ts-k{color:var(--t3)}.ts-v{color:var(--t1);font-family:'DM Mono',monospace;font-size:12px;font-weight:600}
+
+/* DETAIL PANEL */
+.team-detail{display:none;border-top:1px solid var(--bd);background:var(--s1)}
+.team-acc.open .team-detail{display:block}
+.detail-tabs{display:flex;border-bottom:1px solid var(--bd);background:var(--s2)}
+.detail-tab{font-size:11.5px;padding:8px 16px;cursor:pointer;color:var(--t3);border:none;background:transparent;font-family:inherit;transition:all .15s;border-bottom:2px solid transparent}
+.detail-tab:hover{color:var(--t2)}.detail-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.detail-content{padding:14px 16px}
+.detail-pane{display:none}.detail-pane.active{display:block}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd);margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:var(--s2)}
+th{padding:7px 10px;text-align:left;font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;border-bottom:1px solid var(--bd);white-space:nowrap}
+td{padding:6px 10px;border-bottom:1px solid var(--bd);color:var(--t2);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(255,255,255,.012)}
+.td-name{color:var(--t1);font-weight:500;white-space:nowrap}
+.td-num{font-family:'DM Mono',monospace;font-size:12px;text-align:right}
+.td-total{color:var(--blue);font-weight:600;font-family:'DM Mono',monospace;text-align:right}
+.td-date{color:var(--t3);font-size:11px;white-space:nowrap}
+.td-zero{color:var(--t4)}
+
+/* CARD */
+.card{background:rgba(13,20,38,.85);border:1px solid var(--bd);border-radius:var(--r2);padding:16px 18px;margin-bottom:12px;transition:border-color .2s}
+.card:hover{border-color:var(--bd2)}
+.card-head{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+
+/* BADGE */
+.badge{font-size:10px;padding:3px 8px;border-radius:20px;font-weight:600;letter-spacing:.3px}
+.badge-blue{background:rgba(77,158,255,.12);color:var(--blue);border:1px solid rgba(77,158,255,.2)}
+.badge-green{background:rgba(34,217,138,.1);color:var(--green);border:1px solid rgba(34,217,138,.2)}
+.badge-red{background:rgba(240,82,82,.1);color:var(--red);border:1px solid rgba(240,82,82,.2)}
+.badge-warn{background:rgba(245,200,66,.08);color:var(--yellow);border:1px solid rgba(245,200,66,.2)}
+
+/* INPUTS */
+textarea,input[type=text]{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);color:var(--t1);padding:8px 11px;font-size:13px;font-family:inherit;resize:vertical;line-height:1.6;transition:border-color .15s}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--blue2)}
+textarea::placeholder,input[type=text]::placeholder{color:var(--t3)}
+input[type=number]{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);color:var(--t1);padding:6px 9px;font-size:13px;font-family:inherit}
+input[type=number]:focus{outline:none;border-color:var(--blue2)}
+input[type=number].full{width:100%}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--s3);accent-color:var(--blue)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--blue);cursor:pointer}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.fld{font-size:11.5px;color:var(--t2);margin-bottom:5px}
+
+/* BARS */
+.bar-wrap{margin-bottom:9px}
+.bar-lbl{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--t2);margin-bottom:3px}
+.bar-wt{font-size:10px;color:var(--t3)}.bar-pct{font-family:'DM Mono',monospace;font-size:12px}
+.bar-track{height:6px;background:var(--s3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:var(--blue);transition:width .4s ease}
+.bar-fill.g{background:var(--green)}.bar-fill.r{background:var(--red)}.bar-fill.w{background:var(--yellow)}
+.score-formula{background:var(--s3);border:1px solid var(--bd);border-radius:var(--r);padding:11px 15px;display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:12px;flex-wrap:wrap}
+.score-formula-lbl{font-size:12px;color:var(--t3)}
+.score-formula-val{font-size:20px;font-weight:600;font-family:'DM Mono',monospace;color:var(--blue)}
+
+/* BUTTONS */
+button{font-family:inherit;cursor:pointer;border-radius:var(--r);transition:all .15s;font-size:13px}
+.btn{padding:7px 16px;background:var(--s2);color:var(--t2);border:1px solid var(--bd)}
+.btn:hover{background:var(--s3);color:var(--t1);border-color:var(--bd2)}
+.btn-primary{padding:7px 18px;background:rgba(45,126,223,.18);color:var(--blue);border:1px solid rgba(77,158,255,.3);font-weight:600}
+.btn-primary:hover{background:rgba(45,126,223,.3)}
+.btn-sm{padding:4px 11px;font-size:11.5px;background:var(--s3);color:var(--t2);border:1px solid var(--bd)}
+.btn-sm:hover{color:var(--t1)}
+.btn-danger{padding:4px 10px;font-size:11px;background:none;color:var(--red);border:1px solid rgba(240,82,82,.2)}
+.btn-danger:hover{background:rgba(240,82,82,.08)}
+
+/* AI */
+.ai-box{background:rgba(45,126,223,.05);border:1px solid rgba(77,158,255,.18);border-radius:var(--r2);padding:16px 18px;margin-bottom:12px}
+.ai-head{font-size:12.5px;font-weight:600;color:var(--blue);margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.ai-prompt{width:100%;background:rgba(13,20,38,.7);border:1px solid rgba(77,158,255,.18);border-radius:var(--r);color:var(--t1);padding:8px 11px;font-size:13px;font-family:inherit;resize:vertical;line-height:1.6}
+.ai-prompt::placeholder{color:var(--t3)}.ai-prompt:focus{outline:none;border-color:var(--blue2)}
+.btn-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.ai-out{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:11px 14px;font-size:13px;color:var(--t2);line-height:1.75;white-space:pre-wrap;margin-top:10px;display:none}
+.ai-out.loading{color:var(--t3);font-style:italic}
+
+/* SCORE */
+.member-card{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r2);padding:15px 17px;margin-bottom:10px;transition:border-color .2s}
+.member-card:hover{border-color:var(--bd2)}
+.member-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.member-name-input{background:transparent;border:none;color:var(--t1);font-size:13px;font-weight:600;font-family:inherit;padding:0;width:110px}
+.member-name-input:focus{outline:none;border-bottom:1px solid var(--bd2)}
+.member-total{font-size:20px;font-weight:600;font-family:'DM Mono',monospace}
+.score-dims{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.score-dim{background:var(--s3);border-radius:var(--r);padding:11px 13px}
+.score-dim-lbl{font-size:11px;color:var(--t3);margin-bottom:6px}
+.score-dim-wt{font-size:10px;color:var(--t3)}
+.slider-row{display:flex;align-items:center;gap:8px;margin-top:6px}
+.slider-val{font-size:13px;font-weight:600;font-family:'DM Mono',monospace;color:var(--t1);min-width:26px;text-align:right}
+.char-count{font-size:11px;margin-top:4px}
+.risk-row{display:grid;grid-template-columns:88px 1fr 90px auto;gap:8px;align-items:center;margin-bottom:8px}
+hr{border:none;border-top:1px solid var(--bd);margin:13px 0}
+.submit-bar{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:14px;border-top:1px solid var(--bd)}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;font-family:'DM Mono',monospace}
+.pill-g{background:rgba(34,217,138,.1);color:var(--green)}.pill-y{background:rgba(245,200,66,.08);color:var(--yellow)}.pill-r{background:rgba(240,82,82,.1);color:var(--red)}
+.footer{text-align:center;font-size:11px;color:var(--t3);padding:18px;border-top:1px solid var(--bd);margin-top:36px}
+
+/* PERSONAL MINI CHART */
+.person-bar{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.person-bar-name{font-size:11px;color:var(--t2);width:48px;flex-shrink:0;text-align:right}
+.person-bar-track{flex:1;height:8px;background:var(--s3);border-radius:4px;overflow:hidden}
+.person-bar-fill{height:100%;border-radius:4px;background:var(--blue);transition:width .4s ease}
+.person-bar-val{font-size:11px;font-family:'DM Mono',monospace;color:var(--t1);min-width:36px;text-align:right}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><div class="nav-dot"></div>TW 运营中心 · BI</div>
+  <div class="ndiv"></div>
+  <button class="nav-btn active" onclick="switchTab('overview',this)">三组总览</button>
+  <button class="nav-btn" onclick="switchTab('weekly',this)">周报 BI</button>
+  <button class="nav-btn" onclick="switchTab('monthly',this)">月报 BI</button>
+  <button class="nav-btn" onclick="switchTab('score',this)">业务维评分</button>
+  <div class="nav-right">
+    <span class="last-sync" id="last-sync-lbl">未同步</span>
+    <button class="sync-btn" id="sync-btn" onclick="syncAll()">↻ 立即同步</button>
+    <select id="period-sel">
+      <option value="W16">2026-W16（4/14–4/19）</option>
+      <option value="W15">2026-W15（4/7–4/13）</option>
+      <option value="W14">2026-W14（3/31–4/6）</option>
+    </select>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ══ 总览 ══ -->
+<div id="panel-overview" class="panel active">
+  <div class="ph">
+    <div class="ph-eyebrow">Auto-Sync · Google Sheets · 点击组卡展开个人明细</div>
+    <div class="ph-title">三组数据总览</div>
+    <div class="ph-sub">数据直接从 Google Sheets 抓取 · 含每日明细 + 周汇总 · 点击某组展开人员数据</div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-card"><div style="font-size:18px">①</div><div><div class="status-label">运营一组</div><div class="status-val" id="s1-status">等待同步…</div></div></div>
+    <div class="status-card"><div style="font-size:18px">②</div><div><div class="status-label">运营二组</div><div class="status-val" id="s2-status">等待同步…</div></div></div>
+    <div class="status-card"><div style="font-size:18px">③</div><div><div class="status-label">运营三组</div><div class="status-val" id="s3-status">等待同步…</div></div></div>
+  </div>
+
+  <div class="sec">本周三组指标</div>
+  <div class="metrics">
+    <div class="metric"><div class="ma ma-b"></div><div class="metric-lbl">三组合计产出</div><div class="metric-val" id="sum-total">—</div><div class="metric-sub">本周汇总</div></div>
+    <div class="metric"><div class="ma ma-g"></div><div class="metric-lbl">运营一组</div><div class="metric-val" id="g1-grand">—</div><div class="metric-sub">周组总计</div></div>
+    <div class="metric"><div class="ma ma-y"></div><div class="metric-lbl">运营二组</div><div class="metric-val" id="g2-grand">—</div><div class="metric-sub">今日完成</div></div>
+    <div class="metric"><div class="ma ma-p"></div><div class="metric-lbl">运营三组</div><div class="metric-val" id="g3-grand">—</div><div class="metric-sub">当前数据</div></div>
+  </div>
+
+  <div class="sec">三组详情（点击展开 → 个人每日明细 + 周汇总）</div>
+  <div class="team-grid">
+
+    <!-- 运营一组 -->
+    <div class="team-acc" id="acc-g1">
+      <div class="team-acc-head" onclick="toggleAcc('g1')">
+        <div class="ta-left">
+          <span class="ta-name">运营一组</span>
+          <span class="ta-badge ta-b1">TW运营1组</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="ta-total" id="g1-grand-sm">—</span>
+          <span class="ta-arrow">▾</span>
+        </div>
+      </div>
+      <div class="team-acc-summary">
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">剪辑总量</span><span class="ts-v" id="g1s-clip">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">App 更新</span><span class="ts-v" id="g1s-app">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">Web 推送</span><span class="ts-v" id="g1s-web">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">Web 优化</span><span class="ts-v" id="g1s-opt">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">文案 / 其他</span><span class="ts-v" id="g1s-etc">—</span></div>
+      </div>
+      <div class="team-detail" id="detail-g1">
+        <div class="detail-tabs">
+          <button class="detail-tab active" onclick="switchDetail('g1','week',this)">周汇总</button>
+          <button class="detail-tab" onclick="switchDetail('g1','daily',this)">每日明细</button>
+          <button class="detail-tab" onclick="switchDetail('g1','chart',this)">人效对比</button>
+        </div>
+        <div class="detail-content">
+          <div class="detail-pane active" id="g1-pane-week">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>人员</th><th>剪辑</th><th>App更新</th><th>Web推送</th><th>Web优化</th><th>文案</th><th>其他</th><th>周合计</th></tr></thead>
+                <tbody id="g1-week-tbody"><tr><td colspan="8" style="text-align:center;color:var(--t3);padding:12px">同步后显示</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="detail-pane" id="g1-pane-daily">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>日期</th><th>人员</th><th>剪辑</th><th>App更新</th><th>Web推送</th><th>Web优化</th><th>文案</th><th>其他</th><th>当日合计</th></tr></thead>
+                <tbody id="g1-daily-tbody"><tr><td colspan="9" style="text-align:center;color:var(--t3);padding:12px">同步后显示</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="detail-pane" id="g1-pane-chart">
+            <div style="padding:8px 0" id="g1-chart-area"><div style="color:var(--t3);font-size:12px">同步后显示人效对比</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 运营二组 -->
+    <div class="team-acc" id="acc-g2">
+      <div class="team-acc-head" onclick="toggleAcc('g2')">
+        <div class="ta-left">
+          <span class="ta-name">运营二组</span>
+          <span class="ta-badge ta-b2">视频工作表</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="ta-total" id="g2-grand-sm">—</span>
+          <span class="ta-arrow">▾</span>
+        </div>
+      </div>
+      <div class="team-acc-summary">
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">视频封面制作</span><span class="ts-v" id="g2s-cover">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">剪辑去水印</span><span class="ts-v" id="g2s-clip">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">下载视频</span><span class="ts-v" id="g2s-dl">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">实际上架总量</span><span class="ts-v" id="g2s-upload">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">今日完成</span><span class="ts-v" id="g2s-today">—</span></div>
+      </div>
+      <div class="team-detail" id="detail-g2">
+        <div class="detail-tabs">
+          <button class="detail-tab active" onclick="switchDetail('g2','week',this)">周汇总</button>
+          <button class="detail-tab" onclick="switchDetail('g2','daily',this)">每日明细</button>
+        </div>
+        <div class="detail-content">
+          <div class="detail-pane active" id="g2-pane-week">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>任务类型</th><th>本周合计</th></tr></thead>
+                <tbody id="g2-week-tbody"><tr><td colspan="2" style="text-align:center;color:var(--t3);padding:12px">同步后显示</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="detail-pane" id="g2-pane-daily">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>日期</th><th>封面制作</th><th>剪辑去水印</th><th>下载视频</th><th>实际上架</th><th>今日完成</th></tr></thead>
+                <tbody id="g2-daily-tbody"><tr><td colspan="6" style="text-align:center;color:var(--t3);padding:12px">同步后显示</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 运营三组 -->
+    <div class="team-acc" id="acc-g3">
+      <div class="team-acc-head" onclick="toggleAcc('g3')">
+        <div class="ta-left">
+          <span class="ta-name">运营三组</span>
+          <span class="ta-badge ta-b3">运营看板</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="ta-total" id="g3-grand-sm">—</span>
+          <span class="ta-arrow">▾</span>
+        </div>
+      </div>
+      <div class="team-acc-summary">
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">今日总计</span><span class="ts-v" id="g3s-today">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">视频推送</span><span class="ts-v" id="g3s-push">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">优化上架</span><span class="ts-v" id="g3s-opt">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">目标值</span><span class="ts-v" id="g3s-target">—</span></div>
+        <div class="ts-row" style="grid-column:1/-1"><span class="ts-k">频推送组1/2/3</span><span class="ts-v" id="g3s-sub">—</span></div>
+      </div>
+      <div class="team-detail" id="detail-g3">
+        <div class="detail-tabs">
+          <button class="detail-tab active" onclick="switchDetail('g3','week',this)">周汇总</button>
+          <button class="detail-tab" onclick="switchDetail('g3','daily',this)">每日明细</button>
+        </div>
+        <div class="detail-content">
+          <div class="detail-pane active" id="g3-pane-week">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>指标</th><th>数值</th></tr></thead>
+                <tbody id="g3-week-tbody"><tr><td colspan="2" style="text-align:center;color:var(--t3);padding:12px">同步后显示</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="detail-pane" id="g3-pane-daily">
+            <div class="tbl-wrap">
+              <table>
+                <thead><tr><th>日期</th><th>今日总计</th><th>视频推送</th><th>优化上架</th><th>目标值</th></tr></thead>
+                <tbody id="g3-daily-tbody"><tr><td colspan="5" style="text-align:center;color:var(--t3);padding:12px">同步后显示</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end team-grid -->
+</div>
+
+<!-- ══ 周报 BI ══ -->
+<div id="panel-weekly" class="panel">
+  <div class="ph">
+    <div class="ph-eyebrow">Weekly Report · BI Edition</div>
+    <div class="ph-title">团队周数据汇总</div>
+    <div class="ph-sub">目标达成率 50% · 工作态度与质量 30% · 团队任务响应与效率 20%</div>
+  </div>
+  <div class="sec">本周 KPI 综合得分</div>
+  <div class="metrics">
+    <div class="metric"><div class="ma ma-b"></div><div class="metric-lbl">目标达成率</div><div class="metric-val" id="w-val-a">—</div><div class="metric-sub">权重 50%</div></div>
+    <div class="metric"><div class="ma ma-g"></div><div class="metric-lbl">工作态度与质量</div><div class="metric-val" id="w-val-b">—</div><div class="metric-sub">权重 30%</div></div>
+    <div class="metric"><div class="ma ma-y"></div><div class="metric-lbl">响应与效率</div><div class="metric-val" id="w-val-c">—</div><div class="metric-sub">权重 20%</div></div>
+    <div class="metric"><div class="ma ma-b"></div><div class="metric-lbl">部门加权总分</div><div class="metric-val" id="w-val-total">—</div><div class="metric-sub">满分 100</div></div>
+  </div>
+  <div class="sec">KPI 录入</div>
+  <div class="card">
+    <div class="card-head">本周 KPI 填报 <span style="font-size:11px;color:var(--t3)">偏差 &gt;10% 须说明</span></div>
+    <div class="bar-wrap"><div class="bar-lbl"><span>目标达成率</span><span class="bar-wt">50%</span><span class="bar-pct" id="bl-a">—</span></div><div class="bar-track"><div class="bar-fill" id="bf-a" style="width:0%"></div></div></div>
+    <div class="bar-wrap"><div class="bar-lbl"><span>工作态度与质量</span><span class="bar-wt">30%</span><span class="bar-pct" id="bl-b">—</span></div><div class="bar-track"><div class="bar-fill" id="bf-b" style="width:0%"></div></div></div>
+    <div class="bar-wrap"><div class="bar-lbl"><span>团队任务响应与效率</span><span class="bar-wt">20%</span><span class="bar-pct" id="bl-c">—</span></div><div class="bar-track"><div class="bar-fill" id="bf-c" style="width:0%"></div></div></div>
+    <div class="score-formula"><span class="score-formula-lbl">加权综合分 = 达成率×50% + 态度质量×30% + 响应效率×20%</span><span class="score-formula-val" id="w-formula-val">— 分</span></div>
+    <hr>
+    <div class="grid3">
+      <div><div class="fld">目标达成率 (%)</div><input type="number" class="full" id="in-a" min="0" max="200" placeholder="如 88" oninput="calcKPI()"></div>
+      <div><div class="fld">工作态度与质量 (%)</div><input type="number" class="full" id="in-b" min="0" max="100" placeholder="如 90" oninput="calcKPI()"></div>
+      <div><div class="fld">响应与效率 (%)</div><input type="number" class="full" id="in-c" min="0" max="100" placeholder="如 85" oninput="calcKPI()"></div>
+    </div>
+    <div class="fld">偏差说明（偏差 &gt;10% 必填）</div>
+    <input type="text" id="kpi-note" placeholder="如：达成率偏低，原因：缺员 2 人，已启动补招">
+  </div>
+  <div class="sec">三组产出（来自 Sheets 同步）</div>
+  <div class="card">
+    <div class="card-head">各组周汇总 <span class="badge badge-green">自动抓取</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>组别</th><th>周总产出</th><th>达成率 %</th><th>态度质量 %</th><th>响应效率 %</th><th>⚠ 风险</th><th>加权分</th></tr></thead>
+        <tbody>
+          <tr><td class="td-name">运营一组</td><td class="td-num" id="wt-g1">—</td><td><input type="number" class="go" data-idx="0" data-f="rate" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="0" data-f="att" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="0" data-f="resp" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="0" data-f="risk" placeholder="0" oninput="calcGroupRows()" style="width:48px"></td><td id="gw-0">—</td></tr>
+          <tr><td class="td-name">运营二组</td><td class="td-num" id="wt-g2">—</td><td><input type="number" class="go" data-idx="1" data-f="rate" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="1" data-f="att" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="1" data-f="resp" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="1" data-f="risk" placeholder="0" oninput="calcGroupRows()" style="width:48px"></td><td id="gw-1">—</td></tr>
+          <tr><td class="td-name">运营三组</td><td class="td-num" id="wt-g3">—</td><td><input type="number" class="go" data-idx="2" data-f="rate" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="2" data-f="att" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="2" data-f="resp" placeholder="%" oninput="calcGroupRows()" style="width:58px"></td><td><input type="number" class="go" data-idx="2" data-f="risk" placeholder="0" oninput="calcGroupRows()" style="width:48px"></td><td id="gw-2">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="sec">AI 提炼</div>
+  <div class="ai-box">
+    <div class="ai-head"><span>✦</span> AI 自动提炼</div>
+    <textarea class="ai-prompt" id="weekly-raw" rows="4" placeholder="粘贴各组周报原文，AI 按三个 KPI 维度提炼…"></textarea>
+    <div class="btn-row"><button class="btn-primary" onclick="aiExtract('weekly')">✦ AI 提炼</button><button class="btn" onclick="clearAI('weekly')">清除</button></div>
+    <div class="ai-out" id="weekly-ai-out"></div>
+  </div>
+  <div class="sec">风险 & 批注</div>
+  <div class="card">
+    <div class="card-head">本周风险 <button class="btn-sm" onclick="addRisk('weekly')">＋ 添加</button></div>
+    <div id="risk-weekly"></div>
+  </div>
+  <div class="card">
+    <div class="card-head">L3 主管批注</div>
+    <div class="fld">需 L4 GM 决策（48h 内）</div>
+    <textarea id="w-escalate" rows="2" placeholder="无 / 填写需 GM 决策事项…" style="margin-bottom:10px"></textarea>
+    <div class="fld">下周重点预告</div>
+    <textarea id="w-next" rows="2" placeholder="下周 1–3 项核心任务…"></textarea>
+  </div>
+  <div class="submit-bar"><button class="btn" onclick="previewW()">预览</button><button class="btn-primary" onclick="submitW()">生成正式周报文本 →</button></div>
+</div>
+
+<!-- ══ 月报 BI ══ -->
+<div id="panel-monthly" class="panel">
+  <div class="ph">
+    <div class="ph-eyebrow">Monthly Report · BI Edition</div>
+    <div class="ph-title">团队月数据汇总</div>
+    <div class="ph-sub">月度结果导向 · 对照上月目标 · 季末含扩展栏</div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="ma ma-b"></div><div class="metric-lbl">月度目标达成率</div><div class="metric-val" id="m-val-a">—</div><div class="metric-sub">权重 50%</div></div>
+    <div class="metric"><div class="ma ma-g"></div><div class="metric-lbl">态度与质量</div><div class="metric-val" id="m-val-b">—</div><div class="metric-sub">权重 30%</div></div>
+    <div class="metric"><div class="ma ma-y"></div><div class="metric-lbl">响应与效率</div><div class="metric-val" id="m-val-c">—</div><div class="metric-sub">权重 20%</div></div>
+    <div class="metric"><div class="ma ma-b"></div><div class="metric-lbl">月度加权总分</div><div class="metric-val" id="m-val-total">—</div><div class="metric-sub">满分 100</div></div>
+  </div>
+  <div class="card">
+    <div class="card-head">月度 KPI 填报</div>
+    <div class="grid3">
+      <div><div class="fld">月度目标达成率 (%)</div><input type="number" class="full" id="m-in-a" min="0" max="200" placeholder="如 94" oninput="calcMonthKPI()"></div>
+      <div><div class="fld">工作态度与质量 (%)</div><input type="number" class="full" id="m-in-b" min="0" max="100" placeholder="如 88" oninput="calcMonthKPI()"></div>
+      <div><div class="fld">响应与效率 (%)</div><input type="number" class="full" id="m-in-c" min="0" max="100" placeholder="如 82" oninput="calcMonthKPI()"></div>
+    </div>
+    <div class="score-formula"><span class="score-formula-lbl">月度加权综合得分</span><span class="score-formula-val" id="m-formula-val">— 分</span></div>
+  </div>
+  <div class="card">
+    <div class="card-head">对照上月目标</div>
+    <div class="fld">上月目标</div><textarea id="m-last-goal" rows="2" placeholder="上月量化目标…" style="margin-bottom:10px"></textarea>
+    <div class="fld">本月实际达成</div><textarea id="m-result" rows="3" placeholder="逐项说明…" style="margin-bottom:10px"></textarea>
+    <div class="grid2">
+      <div><div class="fld">下月目标（量化）</div><input type="text" id="m-next" placeholder="如：视频同步 xx 件"></div>
+      <div><div class="fld">跨部门协作遗留</div><input type="text" id="m-cross" placeholder="无 / 简述"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head">本月人员变动</div>
+    <div class="grid3">
+      <div><div class="fld">入职</div><input type="number" class="full" id="m-in" min="0" value="0"></div>
+      <div><div class="fld">离职</div><input type="number" class="full" id="m-out" min="0" value="0"></div>
+      <div><div class="fld">转岗</div><input type="number" class="full" id="m-tr" min="0" value="0"></div>
+    </div>
+    <div style="margin-top:10px"><div class="fld">异常说明</div><input type="text" id="m-abnormal" placeholder="如：xx 转岗至产品部"></div>
+  </div>
+  <div class="ai-box">
+    <div class="ai-head"><span>✦</span> AI 月报提炼</div>
+    <textarea class="ai-prompt" id="monthly-raw" rows="4" placeholder="粘贴本月各周报原文…"></textarea>
+    <div class="btn-row"><button class="btn-primary" onclick="aiExtract('monthly')">✦ AI 月报提炼</button><button class="btn" onclick="clearAI('monthly')">清除</button></div>
+    <div class="ai-out" id="monthly-ai-out"></div>
+  </div>
+  <div class="card">
+    <div class="card-head">季末扩展栏 <span class="badge badge-warn">3/6/9/12 月才填</span></div>
+    <div class="fld">季度目标达成率</div><textarea id="m-q-goal" rows="2" placeholder="Q目标1：xx%；…" style="margin-bottom:10px"></textarea>
+    <div class="fld">累计人员异动</div><textarea id="m-q-hr" rows="2" placeholder="入 x / 离 x / 转 x" style="margin-bottom:10px"></textarea>
+    <div class="fld">跨部门遗留问题</div><textarea id="m-q-cross" rows="2" placeholder="本季遗留或升级事项…"></textarea>
+  </div>
+  <div class="submit-bar"><button class="btn" onclick="previewM()">预览</button><button class="btn-primary" onclick="submitM()">生成正式月报文本 →</button></div>
+</div>
+
+<!-- ══ 业务维评分 ══ -->
+<div id="panel-score" class="panel">
+  <div class="ph">
+    <div class="ph-eyebrow">Business Dimension · Scoring</div>
+    <div class="ph-title">业务维评分</div>
+    <div class="ph-sub">L3 主管对直属下级评分 · 达成率（60%）＋ 交付完整度（40%）· 评语 ≥ 50 字</div>
+  </div>
+  <div class="card">
+    <div class="card-head">评分成员
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-sm" onclick="addPreset()">＋ 批量导入运营一组（7人）</button>
+        <button class="btn-sm" onclick="addMember()">＋ 手动添加</button>
+      </div>
+    </div>
+    <div id="member-list"><div style="font-size:13px;color:var(--t3);padding:4px 0">点击「批量导入」开始评分</div></div>
+  </div>
+  <div class="card" id="score-summary-card" style="display:none">
+    <div class="card-head">本期评分汇总</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>成员</th><th>所属组</th><th>达成率得分</th><th>交付完整度</th><th>业务维综合分</th><th>评语字数</th><th>状态</th></tr></thead>
+        <tbody id="score-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="submit-bar"><button class="btn-primary" onclick="exportScores()">导出评分摘要 →</button></div>
+</div>
+
+</div><!-- wrap -->
+<div class="footer">TW 运营中心 · L3 主管 BI 看板（自动同步 + 个人明细版）· 2026</div>
+
+<script>
+// ── SHEETS CONFIG ──
+const SHEETS = {
+  g1:{id:'1jR0LWnIClwDq0-nNC1yCACntEw3dTk2QiHXEyUCBEsk', gid:'90530566'},
+  g2:{id:'1majUXFe4x17G2uFCPBnIRQ4dqwskCGL3lKmq2DhK-wg', gid:'1455626830'},
+  g3:{id:'1dbdsfiL9w1p_KiJQmpOmht5BTnLH-iKO', gid:'545885725'}
+};
+const G1_MEMBERS = ['辉锅','木火','悠扣','双髻鲨','乔治亚','柚子','信杰'];
+const members = [], groupData = [{},{},{}];
+
+// ── TABS ──
+function switchTab(id,el){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// ── ACCORDION ──
+function toggleAcc(g){
+  const el = document.getElementById('acc-'+g);
+  el.classList.toggle('open');
+}
+function switchDetail(g, pane, el){
+  const base = '#'+g+'-pane-';
+  document.querySelectorAll('[id^="'+g+'-pane-"]').forEach(p=>p.classList.remove('active'));
+  document.getElementById(g+'-pane-'+pane).classList.add('active');
+  el.closest('.detail-tabs').querySelectorAll('.detail-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── CSV FETCH ──
+async function fetchCSV(id, gid){
+  const url = `https://docs.google.com/spreadsheets/d/${id}/export?format=csv&gid=${gid}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('fetch failed '+res.status);
+  return parseCSV(await res.text());
+}
+function parseCSV(text){
+  return text.split('\n').map(line=>{
+    const row=[]; let inQ=false, cur='';
+    for(const c of line){
+      if(c==='"'){inQ=!inQ}
+      else if(c===','&&!inQ){row.push(cur.trim());cur='';}
+      else{cur+=c}
+    }
+    row.push(cur.trim()); return row;
+  });
+}
+function num(v){return parseFloat((v||'').replace(/,/g,'').replace('#REF!','').replace('#N/A',''))||0}
+function fmtNum(v){return v>0?v.toLocaleString():'—'}
+
+// ── G1 SYNC ──
+async function syncG1(){
+  setStatus('s1','读取中…','s-wait');
+  try{
+    const rows = await fetchCSV(SHEETS.g1.id, SHEETS.g1.gid);
+
+    // 数据结构：每个周块 = [日期行, 人员行, 任务行×N]
+    // 找所有周块：日期行特征 = row[0]有日期内容 or row[0]='日期'
+    // 人员行特征 = row[2]或row[3]等于 G1_MEMBERS 中的名字
+    // 周总量在最后7列（对应7人）+ 最后1列（组总计）
+
+    // 先找任务名 -> 周总量 的映射（最后一个周块）
+    const taskWeekTotals = {}; // {taskName: {辉锅:N,...}}
+    const dailyData = []; // [{date, member, tasks:{clip,app,...}}]
+
+    let currentDate = '';
+    let memberCols = []; // [{col, name}]
+    let weekSumCols = []; // 周总量对应列索引
+
+    for(let r=0;r<rows.length;r++){
+      const row = rows[r];
+      const cell0 = (row[0]||'').trim();
+      const cell1 = (row[1]||'').trim();
+
+      // 日期行：cell1或后续有日期格式（包含/）
+      if(cell0==='日期'||(cell0&&/\d+\/\d+/.test(cell0+cell1+row[2])&&!G1_MEMBERS.includes(cell1))){
+        currentDate = '';
+        // 解析当前行的日期列
+      }
+
+      // 人员行：row中出现人员名
+      if(G1_MEMBERS.includes(cell1)||G1_MEMBERS.includes(row[2])){
+        memberCols = [];
+        for(let c=1;c<row.length;c++){
+          if(G1_MEMBERS.includes((row[c]||'').trim())){
+            memberCols.push({col:c, name:(row[c]||'').trim()});
+          }
+        }
+        continue;
+      }
+
+      // 任务数据行
+      if(!cell0||memberCols.length===0) continue;
+
+      const taskKey = cell0;
+      if(!taskWeekTotals[taskKey]) taskWeekTotals[taskKey]={};
+
+      // 找周总量区域：最后 7+1 列
+      const endCol = row.length-1; // 组总计
+      // 往前7格是7人的周总量
+      const weekStart = endCol - 7;
+      if(weekStart > 0){
+        // 按照固定顺序：辉锅,木火,悠扣,双髻鲨,乔治亚,柚子,信杰
+        G1_MEMBERS.forEach((name,i)=>{
+          const v = num(row[weekStart+i]);
+          taskWeekTotals[taskKey][name] = (taskWeekTotals[taskKey][name]||0) + v;
+        });
+      }
+    }
+
+    // 提取关键指标
+    const getTask = key => {
+      const t = taskWeekTotals[key]||{};
+      return G1_MEMBERS.reduce((s,m)=>s+(t[m]||0),0);
+    };
+    const clip = getTask('剪辑总量');
+    const app  = getTask('App 更新总量');
+    const web  = getTask('Web 视频推送');
+    const opt  = getTask('Web 优化上架');
+    const txt  = getTask('文案帖子');
+    const oth  = getTask('其他');
+    const grand= clip+app+web+opt+txt+oth;
+
+    // 更新 summary
+    document.getElementById('g1s-clip').textContent = fmtNum(clip);
+    document.getElementById('g1s-app').textContent  = fmtNum(app);
+    document.getElementById('g1s-web').textContent  = fmtNum(web);
+    document.getElementById('g1s-opt').textContent  = fmtNum(opt);
+    document.getElementById('g1s-etc').textContent  = fmtNum(txt+oth);
+    document.getElementById('g1-grand').textContent = fmtNum(grand);
+    document.getElementById('g1-grand-sm').textContent = fmtNum(grand);
+    document.getElementById('wt-g1').textContent = fmtNum(grand);
+
+    // 周汇总表：人员 × 任务
+    const taskKeys = ['剪辑总量','App 更新总量','Web 视频推送','Web 优化上架','文案帖子','其他'];
+    const weekTbody = document.getElementById('g1-week-tbody');
+    weekTbody.innerHTML = G1_MEMBERS.map(m=>{
+      const vals = taskKeys.map(k=>taskWeekTotals[k]?.[m]||0);
+      const total = vals.reduce((a,b)=>a+b,0);
+      return `<tr>
+        <td class="td-name">${m}</td>
+        ${vals.map(v=>`<td class="${v?'td-num':'td-num td-zero'}">${v||0}</td>`).join('')}
+        <td class="td-total">${total}</td>
+      </tr>`;
+    }).join('') + `<tr style="background:var(--s3)">
+      <td class="td-name" style="color:var(--t3)">合计</td>
+      ${taskKeys.map(k=>`<td class="td-total">${fmtNum(G1_MEMBERS.reduce((s,m)=>s+(taskWeekTotals[k]?.[m]||0),0))}</td>`).join('')}
+      <td class="td-total" style="color:var(--green)">${fmtNum(grand)}</td>
+    </tr>`;
+
+    // 每日明细表（从原始行重新解析每日数据）
+    // 找每日数据：在原始CSV中，每日列有具体日期
+    // 结构：日期行的列头 = 日期，人员行 = 人员名，任务行 = 每日值
+    const dailyRows = [];
+    let inDailyBlock = false;
+    let dailyDates = [];
+    let dailyMemberMap = {}; // col -> name
+
+    for(let r=0;r<rows.length;r++){
+      const row = rows[r];
+      const cell0 = (row[0]||'').trim();
+
+      // 检测日期行：包含类似 3/30, 4/1 等
+      const dateMatches = [];
+      for(let c=1;c<row.length;c++){
+        if(/^\d+\/\d+$/.test((row[c]||'').trim())){
+          dateMatches.push({col:c, date:(row[c]||'').trim()});
+        }
+      }
+      if(dateMatches.length>=3){
+        dailyDates = dateMatches;
+        inDailyBlock = true;
+        continue;
+      }
+
+      // 人员行
+      if(inDailyBlock && G1_MEMBERS.some(m=>Object.values(row).includes(m))){
+        dailyMemberMap = {};
+        for(let c=0;c<row.length;c++){
+          if(G1_MEMBERS.includes((row[c]||'').trim())){
+            dailyMemberMap[c] = (row[c]||'').trim();
+          }
+        }
+        continue;
+      }
+
+      // 任务行
+      if(inDailyBlock && cell0 && Object.keys(dailyMemberMap).length>0 && dailyDates.length>0){
+        dailyRows.push({task:cell0, row:[...row], dates:dailyDates, memberMap:{...dailyMemberMap}});
+      }
+    }
+
+    // 组织每日明细数据
+    const dailyMap = {}; // date -> member -> {task:val}
+    for(const {task, row, dates, memberMap} of dailyRows){
+      const mainTasks = ['剪辑总量','App 更新总量','Web 视频推送','Web 优化上架','文案帖子','其他'];
+      if(!mainTasks.includes(task)) continue;
+      for(const {col: dc, date} of dates){
+        if(!dailyMap[date]) dailyMap[date]={};
+        // 找该日期对应的人员列（在dc到dc+7之间）
+        for(const [mc, mname] of Object.entries(memberMap)){
+          if(parseInt(mc)>=dc && parseInt(mc)<dc+8){
+            if(!dailyMap[date][mname]) dailyMap[date][mname]={clip:0,app:0,web:0,opt:0,txt:0,oth:0};
+            const v = num(row[mc]);
+            if(task==='剪辑总量') dailyMap[date][mname].clip+=v;
+            else if(task==='App 更新总量') dailyMap[date][mname].app+=v;
+            else if(task==='Web 视频推送') dailyMap[date][mname].web+=v;
+            else if(task==='Web 优化上架') dailyMap[date][mname].opt+=v;
+            else if(task==='文案帖子') dailyMap[date][mname].txt+=v;
+            else if(task==='其他') dailyMap[date][mname].oth+=v;
+          }
+        }
+      }
+    }
+
+    const dailyTbody = document.getElementById('g1-daily-tbody');
+    const sortedDates = Object.keys(dailyMap).sort((a,b)=>{
+      const [am,ad]=a.split('/').map(Number), [bm,bd]=b.split('/').map(Number);
+      return am!==bm?am-bm:ad-bd;
+    });
+
+    if(sortedDates.length===0){
+      dailyTbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:12px">暂无每日明细（表格结构复杂，建议直接看周汇总）</td></tr>`;
+    } else {
+      let html = '';
+      for(const date of sortedDates){
+        const members_day = Object.entries(dailyMap[date]);
+        members_day.forEach(([mname, d], i)=>{
+          const total = d.clip+d.app+d.web+d.opt+d.txt+d.oth;
+          if(total===0) return;
+          html += `<tr>
+            ${i===0?`<td class="td-date" rowspan="${members_day.filter(([,d2])=>d2.clip+d2.app+d2.web+d2.opt+d2.txt+d2.oth>0).length}">${date}</td>`:''}
+            <td class="td-name">${mname}</td>
+            <td class="${d.clip?'td-num':'td-num td-zero'}">${d.clip||0}</td>
+            <td class="${d.app?'td-num':'td-num td-zero'}">${d.app||0}</td>
+            <td class="${d.web?'td-num':'td-num td-zero'}">${d.web||0}</td>
+            <td class="${d.opt?'td-num':'td-num td-zero'}">${d.opt||0}</td>
+            <td class="${d.txt?'td-num':'td-num td-zero'}">${d.txt||0}</td>
+            <td class="${d.oth?'td-num':'td-num td-zero'}">${d.oth||0}</td>
+            <td class="td-total">${total}</td>
+          </tr>`;
+        });
+      }
+      dailyTbody.innerHTML = html || `<tr><td colspan="9" style="text-align:center;color:var(--t3);padding:12px">无有效每日数据</td></tr>`;
+    }
+
+    // 人效对比图
+    const chartArea = document.getElementById('g1-chart-area');
+    const memberTotals = G1_MEMBERS.map(m=>({
+      name:m,
+      total:taskKeys.reduce((s,k)=>s+(taskWeekTotals[k]?.[m]||0),0)
+    })).sort((a,b)=>b.total-a.total);
+    const maxTotal = Math.max(...memberTotals.map(m=>m.total),1);
+    chartArea.innerHTML = `<div style="margin-bottom:8px;font-size:11px;color:var(--t3)">本周个人产出对比（按合计排序）</div>` +
+      memberTotals.map(({name,total})=>`
+        <div class="person-bar">
+          <span class="person-bar-name">${name}</span>
+          <div class="person-bar-track"><div class="person-bar-fill" style="width:${Math.round(total/maxTotal*100)}%"></div></div>
+          <span class="person-bar-val">${fmtNum(total)}</span>
+        </div>`).join('');
+
+    setStatus('s1','✓ 已同步','s-ok');
+    window._g1Total = grand;
+    updateSum();
+  }catch(e){
+    setStatus('s1','✗ 需公开权限','s-err');
+    console.error('G1:',e);
+  }
+}
+
+// ── G2 SYNC ──
+async function syncG2(){
+  setStatus('s2','读取中…','s-wait');
+  try{
+    const rows = await fetchCSV(SHEETS.g2.id, SHEETS.g2.gid);
+    let cover=0,clip=0,dl=0,upload=0,x2=0,today=0;
+    const dailyG2 = []; // {date, cover, clip, dl, upload, today}
+
+    for(let r=0;r<rows.length;r++){
+      const row = rows[r];
+      const label = (row[0]||'').trim();
+      const lastN = num(row[row.length-2]||row[row.length-1]);
+      if(label.includes('视频封面制作')||label==='视频封面制作：') cover=lastN;
+      else if(label.includes('剪辑去水印')||label.includes('视频剪辑去水印')) clip=lastN;
+      else if(label.includes('下载视频')) dl=lastN;
+      else if(label.includes('实际上架总量')) upload=lastN;
+      else if(label.includes('今日总完成数量')||label.includes('今日总完成')) today=num(row[1]||row[2])||lastN;
+      else if(label.includes('总产出(视频数*2)')||label.includes('总产出*2')||label.includes('视频*2')) x2=lastN;
+    }
+
+    // 每日数据：从行中找日期列
+    const dayRows = [];
+    for(const row of rows){
+      for(let c=0;c<row.length;c++){
+        if(/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test((row[c]||'').trim())||
+           /^\d{1,2}[/]\d{1,2}$/.test((row[c]||'').trim())){
+          // 这行可能有日期
+        }
+      }
+    }
+
+    const grand = today||(cover+clip+dl);
+    document.getElementById('g2s-cover').textContent = fmtNum(cover);
+    document.getElementById('g2s-clip').textContent  = fmtNum(clip);
+    document.getElementById('g2s-dl').textContent    = fmtNum(dl);
+    document.getElementById('g2s-upload').textContent= fmtNum(upload);
+    document.getElementById('g2s-today').textContent = fmtNum(today);
+    document.getElementById('g2-grand').textContent  = fmtNum(grand);
+    document.getElementById('g2-grand-sm').textContent = fmtNum(grand);
+    document.getElementById('wt-g2').textContent = fmtNum(grand);
+
+    // 周汇总表
+    const tasks = [
+      ['视频封面制作',cover],['视频剪辑去水印',clip],['下载视频',dl],
+      ['实际上架总量',upload],['总产出×2',x2],['今日完成',today]
+    ];
+    document.getElementById('g2-week-tbody').innerHTML = tasks.map(([k,v])=>
+      `<tr><td class="td-name">${k}</td><td class="td-num ${v?'':'td-zero'}">${fmtNum(v)}</td></tr>`
+    ).join('');
+
+    // 每日明细：尝试从列找每天数据
+    const g2DailyTbody = document.getElementById('g2-daily-tbody');
+    // 二组的列结构：列=日期，行=任务类型
+    // 找日期行（第一行或包含日期的行）
+    let dateRow = null, coverRow=null, clipRow=null, dlRow=null, uploadRow=null, todayRow=null;
+    for(const row of rows){
+      const label = (row[0]||'').trim();
+      if(label.includes('视频封面制作')) coverRow=row;
+      else if(label.includes('剪辑去水印')) clipRow=row;
+      else if(label.includes('下载视频')&&!label.includes('实际')) dlRow=row;
+      else if(label.includes('实际上架')) uploadRow=row;
+      else if(label.includes('今日总完成')) todayRow=row;
+    }
+
+    // 从列头找日期
+    if(todayRow){
+      let g2DailyHtml = '';
+      const refRow = rows[0]||[];
+      const dateCols = [];
+      for(let c=1;c<refRow.length;c++){
+        const v = (refRow[c]||'').trim();
+        if(/^\d+$/.test(v) && parseInt(v)>=1 && parseInt(v)<=31){
+          dateCols.push({col:c, day:parseInt(v)});
+        }
+      }
+      if(dateCols.length>0){
+        dateCols.forEach(({col,day})=>{
+          const cVal  = coverRow?num(coverRow[col]):0;
+          const clVal = clipRow?num(clipRow[col]):0;
+          const dVal  = dlRow?num(dlRow[col]):0;
+          const uVal  = uploadRow?num(uploadRow[col]):0;
+          const tVal  = todayRow?num(todayRow[col]):0;
+          if(cVal||clVal||dVal||uVal||tVal){
+            g2DailyHtml += `<tr>
+              <td class="td-date">4/${day}</td>
+              <td class="${cVal?'td-num':'td-num td-zero'}">${cVal||0}</td>
+              <td class="${clVal?'td-num':'td-num td-zero'}">${clVal||0}</td>
+              <td class="${dVal?'td-num':'td-num td-zero'}">${dVal||0}</td>
+              <td class="${uVal?'td-num':'td-num td-zero'}">${uVal||0}</td>
+              <td class="td-total">${tVal||0}</td>
+            </tr>`;
+          }
+        });
+        g2DailyTbody.innerHTML = g2DailyHtml || `<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:12px">暂无每日数据</td></tr>`;
+      } else {
+        g2DailyTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:12px">表格列结构复杂，建议查看周汇总</td></tr>`;
+      }
+    }
+
+    setStatus('s2','✓ 已同步','s-ok');
+    window._g2Total = grand;
+    updateSum();
+  }catch(e){
+    setStatus('s2','✗ 需公开权限','s-err');
+    console.error('G2:',e);
+  }
+}
+
+// ── G3 SYNC ──
+async function syncG3(){
+  setStatus('s3','读取中…','s-wait');
+  try{
+    const rows = await fetchCSV(SHEETS.g3.id, SHEETS.g3.gid);
+    let today=0,push=0,opt=0,target=0,g1=0,g2=0,g3=0;
+    const daily3 = [];
+
+    for(let r=0;r<rows.length;r++){
+      const row = rows[r];
+      const label=(row[0]||'').trim();
+      const v1=num(row[1]),v2=num(row[2]);
+      if(label.includes('今日总计')) today=v1||v2;
+      else if(label.includes('视频推送')&&!label.includes('频推送')) push=v1||v2;
+      else if(label.includes('优化上架')) opt=v1||v2;
+      else if(label==='目标值'||label.includes('目标值')) target=v1||v2;
+      else if(label.includes('频推送')&&label.includes('1')) g1=v1||v2;
+      else if(label.includes('频推送')&&label.includes('2')) g2=v1||v2;
+      else if(label.includes('频推送')&&label.includes('3')) g3=v1||v2;
+
+      // 每日数据：找日期列
+      if(row[0]&&/\d{4}-\d{2}-\d{2}/.test(row[0])){
+        daily3.push({date:row[0],today:num(row[1]),push:num(row[2]),opt:num(row[3]),target:num(row[4])});
+      } else if(row[0]&&/^\d{1,2}\/\d{1,2}$/.test((row[0]||'').trim())){
+        daily3.push({date:row[0],today:num(row[1]),push:num(row[2]),opt:num(row[3]),target:num(row[4])});
+      }
+    }
+
+    document.getElementById('g3s-today').textContent  = fmtNum(today);
+    document.getElementById('g3s-push').textContent   = fmtNum(push);
+    document.getElementById('g3s-opt').textContent    = fmtNum(opt);
+    document.getElementById('g3s-target').textContent = fmtNum(target);
+    document.getElementById('g3s-sub').textContent    = [g1,g2,g3].some(v=>v)?`${g1} / ${g2} / ${g3}`:'—';
+    document.getElementById('g3-grand').textContent   = fmtNum(today);
+    document.getElementById('g3-grand-sm').textContent= fmtNum(today);
+    document.getElementById('wt-g3').textContent = fmtNum(today);
+
+    // 周汇总表
+    document.getElementById('g3-week-tbody').innerHTML = [
+      ['今日总计',today],['视频推送',push],['优化上架',opt],
+      ['目标值',target],['频推送组1',g1],['频推送组2',g2],['频推送组3',g3]
+    ].map(([k,v])=>`<tr><td class="td-name">${k}</td><td class="td-num ${v?'':'td-zero'}">${fmtNum(v)}</td></tr>`).join('');
+
+    // 每日明细
+    const g3dt = document.getElementById('g3-daily-tbody');
+    if(daily3.length>0){
+      g3dt.innerHTML = daily3.map(d=>`<tr>
+        <td class="td-date">${d.date}</td>
+        <td class="${d.today?'td-num':'td-num td-zero'}">${fmtNum(d.today)}</td>
+        <td class="${d.push?'td-num':'td-num td-zero'}">${fmtNum(d.push)}</td>
+        <td class="${d.opt?'td-num':'td-num td-zero'}">${fmtNum(d.opt)}</td>
+        <td class="${d.target?'td-num':'td-num td-zero'}">${fmtNum(d.target)}</td>
+      </tr>`).join('');
+    } else {
+      g3dt.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:12px">暂无每日数据行</td></tr>`;
+    }
+
+    setStatus('s3','✓ 已同步','s-ok');
+    window._g3Total = today;
+    updateSum();
+  }catch(e){
+    setStatus('s3','✗ 需公开权限','s-err');
+    console.error('G3:',e);
+  }
+}
+
+// ── HELPERS ──
+function setStatus(id,txt,cls){
+  const el=document.getElementById(id);
+  el.textContent=txt;
+  el.className='status-val '+cls;
+}
+function updateSum(){
+  const t=( window._g1Total||0)+(window._g2Total||0)+(window._g3Total||0);
+  document.getElementById('sum-total').textContent=fmtNum(t)||'—';
+}
+async function syncAll(){
+  const btn=document.getElementById('sync-btn');
+  btn.textContent='↻ 同步中…';btn.classList.add('spinning');
+  document.getElementById('last-sync-lbl').textContent='同步中…';
+  await Promise.allSettled([syncG1(),syncG2(),syncG3()]);
+  const now=new Date();
+  document.getElementById('last-sync-lbl').textContent='上次：'+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  btn.textContent='↻ 立即同步';btn.classList.remove('spinning');
+}
+
+// ── KPI ──
+function colorOf(v){return v>=90?'up':v<80?'dn':'warn'}
+function setBar(k,pct){
+  const bf=document.getElementById('bf-'+k),bl=document.getElementById('bl-'+k);
+  if(!bf)return;
+  bf.style.width=Math.min(pct,100)+'%';
+  bf.className='bar-fill '+(pct>=90?'g':pct<80?'r':'w');
+  bl.textContent=Math.round(pct)+'%';
+}
+function calcKPI(){
+  const a=parseFloat(document.getElementById('in-a').value)||0;
+  const b=parseFloat(document.getElementById('in-b').value)||0;
+  const c=parseFloat(document.getElementById('in-c').value)||0;
+  setBar('a',a);setBar('b',b);setBar('c',c);
+  const total=a*.5+b*.3+c*.2;
+  const setMV=(id,v)=>{const el=document.getElementById(id);el.textContent=v?Math.round(v)+'%':'—';el.className='metric-val '+(v?colorOf(v):'')};
+  setMV('w-val-a',a);setMV('w-val-b',b);setMV('w-val-c',c);
+  const te=document.getElementById('w-val-total');
+  te.textContent=(a||b||c)?Math.round(total):'—';
+  te.className='metric-val '+((a||b||c)?colorOf(total):'');
+  document.getElementById('w-formula-val').textContent=(a||b||c)?Math.round(total)+' 分':'— 分';
+}
+function pillHtml(v){const cls=v>=90?'pill-g':v<80?'pill-r':'pill-y';return '<span class="pill '+cls+'">'+Math.round(v)+'</span>'}
+function calcGroupRows(){
+  document.querySelectorAll('.go').forEach(inp=>{
+    const idx=+inp.dataset.idx,f=inp.dataset.f;
+    groupData[idx][f]=parseFloat(inp.value)||0;
+  });
+  [0,1,2].forEach(i=>{
+    const d=groupData[i]||{},r=d.rate||0,at=d.att||0,re=d.resp||0,w=r*.5+at*.3+re*.2;
+    const el=document.getElementById('gw-'+i);
+    if(el)el.innerHTML=(r||at||re)?pillHtml(w):'—';
+  });
+}
+function calcMonthKPI(){
+  const a=parseFloat(document.getElementById('m-in-a').value)||0;
+  const b=parseFloat(document.getElementById('m-in-b').value)||0;
+  const c=parseFloat(document.getElementById('m-in-c').value)||0;
+  const total=a*.5+b*.3+c*.2;
+  const setMV=(id,v)=>{const el=document.getElementById(id);el.textContent=v?Math.round(v)+'%':'—';el.className='metric-val '+(v?colorOf(v):'')};
+  setMV('m-val-a',a);setMV('m-val-b',b);setMV('m-val-c',c);
+  const te=document.getElementById('m-val-total');
+  te.textContent=(a||b||c)?Math.round(total):'—';
+  te.className='metric-val '+((a||b||c)?colorOf(total):'');
+  document.getElementById('m-formula-val').textContent=(a||b||c)?Math.round(total)+' 分':'— 分';
+}
+function addRisk(scope){
+  const list=document.getElementById('risk-'+scope);
+  const row=document.createElement('div');row.className='risk-row';
+  row.innerHTML='<select style="font-size:12px"><option>低风险</option><option selected>中风险</option><option>高风险 ⚠</option></select><input type="text" placeholder="风险描述…"><input type="text" placeholder="负责人">';
+  const del=document.createElement('button');del.textContent='删除';del.className='btn-danger';del.onclick=()=>row.remove();
+  row.appendChild(del);list.appendChild(row);
+}
+
+// ── 评分 ──
+const G1P=[{name:'辉锅'},{name:'木火'},{name:'悠扣'},{name:'双髻鲨'},{name:'乔治亚'},{name:'柚子'},{name:'信杰'}].map(m=>({...m,group:'运营一组'}));
+function addPreset(){G1P.forEach(m=>{if(!members.find(x=>x.name===m.name))members.push({...m,s1:0,s2:0,comment:''})});renderMembers();}
+function addMember(){members.push({name:'新成员',group:'运营一组',s1:0,s2:0,comment:''});renderMembers();}
+function renderMembers(){
+  const list=document.getElementById('member-list');
+  if(!members.length){list.innerHTML='<div style="font-size:13px;color:var(--t3);padding:4px 0">点击「批量导入」开始评分</div>';document.getElementById('score-summary-card').style.display='none';return;}
+  list.innerHTML=members.map((m,i)=>{
+    const total=Math.round(m.s1*.6+m.s2*.4),tc=m.comment.length>=50;
+    const tc2=total>=90?'var(--green)':total<80?'var(--red)':'var(--yellow)';
+    return `<div class="member-card">
+      <div class="member-head">
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="member-name-input" type="text" value="${m.name}" onchange="members[${i}].name=this.value;renderSummary()">
+          <select style="font-size:11px;padding:3px 7px" onchange="members[${i}].group=this.value">
+            <option ${m.group==='运营一组'?'selected':''}>运营一组</option>
+            <option ${m.group==='运营二组'?'selected':''}>运营二组</option>
+            <option ${m.group==='运营三组'?'selected':''}>运营三组</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--t3)">综合分</span>
+          <span class="member-total" style="color:${tc2}">${total}</span>
+          <button class="btn-danger" onclick="members.splice(${i},1);renderMembers()">删除</button>
+        </div>
+      </div>
+      <div class="score-dims">
+        <div class="score-dim"><div class="score-dim-lbl">业务目标达成率 <span class="score-dim-wt">60%</span></div>
+          <div class="slider-row"><input type="range" min="0" max="100" step="1" value="${m.s1}" oninput="members[${i}].s1=+this.value;this.nextElementSibling.textContent=this.value;renderMembers()"><span class="slider-val">${m.s1}</span></div>
+        </div>
+        <div class="score-dim"><div class="score-dim-lbl">攻坚项目交付完整度 <span class="score-dim-wt">40%</span></div>
+          <div class="slider-row"><input type="range" min="0" max="100" step="1" value="${m.s2}" oninput="members[${i}].s2=+this.value;this.nextElementSibling.textContent=this.value;renderMembers()"><span class="slider-val">${m.s2}</span></div>
+        </div>
+      </div>
+      <div class="fld">评语（≥ 50 字）</div>
+      <textarea rows="2" placeholder="至少 50 字…" oninput="members[${i}].comment=this.value;renderSummary()">${m.comment}</textarea>
+      <div class="char-count" style="color:${tc?'var(--green)':'var(--red)'}">已输入 ${m.comment.length} 字${tc?' ✓':'（不足50字）'}</div>
+    </div>`;
+  }).join('');
+  renderSummary();
+}
+function renderSummary(){
+  const card=document.getElementById('score-summary-card'),tbody=document.getElementById('score-tbody');
+  if(!members.length){card.style.display='none';return;}
+  card.style.display='block';
+  tbody.innerHTML=members.map(m=>{
+    const total=Math.round(m.s1*.6+m.s2*.4),pc=total>=90?'pill-g':total<80?'pill-r':'pill-y',ok=m.comment.length>=50;
+    return `<tr><td class="td-name">${m.name}</td><td style="color:var(--t3)">${m.group}</td><td>${m.s1}</td><td>${m.s2}</td><td><span class="pill ${pc}">${total}</span></td><td style="color:${ok?'var(--green)':'var(--red)'}">${m.comment.length}字</td><td>${ok?'<span class="badge badge-green">可提交</span>':'<span class="badge badge-red">评语不足</span>'}</td></tr>`;
+  }).join('');
+}
+
+// ── AI ──
+async function aiExtract(scope){
+  const raw=document.getElementById(scope+'-raw').value.trim();
+  const out=document.getElementById(scope+'-ai-out');
+  if(!raw){alert('请先粘贴周报文本');return;}
+  out.style.display='block';out.className='ai-out loading';out.textContent='正在提炼…';
+  const isM=scope==='monthly';
+  const sys=isM?'你是管理顾问助手，帮 L3 主管提炼月报，按三个 KPI 维度输出，不超过 300 字，纯文字：\n【目标达成率（权重50%）】\n【工作态度与质量（权重30%）】\n【团队任务响应与效率（权重20%）】\n【月度主要问题】\n【建议下月重点】':'你是管理顾问助手，帮 L3 主管提炼周报，不超过 200 字，纯文字：\n【目标达成率（权重50%）】\n【工作态度与质量（权重30%）】\n【团队任务响应与效率（权重20%）】\n【本周风险】';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:raw}]})});
+    const data=await resp.json();
+    out.className='ai-out';out.textContent=data.content?.map(b=>b.text||'').join('')||'提炼失败。';
+  }catch(e){out.className='ai-out';out.textContent='网络错误，请重试。';}
+}
+function clearAI(scope){document.getElementById(scope+'-raw').value='';const out=document.getElementById(scope+'-ai-out');out.style.display='none';out.textContent='';}
+function copyText(msg){const el=document.createElement('textarea');el.value=msg;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);alert('✓ 已复制！\n\n'+msg);}
+function previewW(){const a=document.getElementById('in-a').value||'—',b=document.getElementById('in-b').value||'—',c=document.getElementById('in-c').value||'—';alert('【L3 周报预览】\n周期：'+document.getElementById('period-sel').value+'\nKPI：达成率 '+a+'% / 态度质量 '+b+'% / 响应效率 '+c+'%\n加权分：'+Math.round((parseFloat(a)||0)*.5+(parseFloat(b)||0)*.3+(parseFloat(c)||0)*.2));}
+function submitW(){const a=document.getElementById('in-a').value||'—',b=document.getElementById('in-b').value||'—',c=document.getElementById('in-c').value||'—',total=(parseFloat(a)||0)*.5+(parseFloat(b)||0)*.3+(parseFloat(c)||0)*.2;copyText('【TW 运营中心 · L3 部门周报】\n周期：'+document.getElementById('period-sel').value+'\n\n■ KPI 数据\n目标达成率：'+a+'%（权重50%）\n工作态度与质量：'+b+'%（权重30%）\n团队任务响应与效率：'+c+'%（权重20%）\n加权综合分：'+Math.round(total)+' 分\n偏差说明：'+(document.getElementById('kpi-note').value||'无')+'\n\n■ 需 L4 GM 决策（48h内）\n'+(document.getElementById('w-escalate').value||'无')+'\n\n■ 下周重点\n'+(document.getElementById('w-next').value||'待填'));}
+function previewM(){alert('【L3 月报预览】\n加权综合分：'+Math.round((parseFloat(document.getElementById('m-in-a').value)||0)*.5+(parseFloat(document.getElementById('m-in-b').value)||0)*.3+(parseFloat(document.getElementById('m-in-c').value)||0)*.2)+'\n下月目标：'+(document.getElementById('m-next').value||'未填'));}
+function submitM(){const a=document.getElementById('m-in-a').value||'—',b=document.getElementById('m-in-b').value||'—',c=document.getElementById('m-in-c').value||'—',total=(parseFloat(a)||0)*.5+(parseFloat(b)||0)*.3+(parseFloat(c)||0)*.2;copyText('【TW 运营中心 · L3 部门月报】\n\n■ KPI 数据\n达成率：'+a+'% / 态度质量：'+b+'% / 响应效率：'+c+'%\n月度加权综合分：'+Math.round(total)+' 分\n\n■ 月度结果\n'+(document.getElementById('m-result').value||'未填')+'\n\n■ 下月目标\n'+(document.getElementById('m-next').value||'未填')+'\n\n■ 人员异动\n入职 '+(document.getElementById('m-in').value||0)+' / 离职 '+(document.getElementById('m-out').value||0)+' / 转岗 '+(document.getElementById('m-tr').value||0));}
+function exportScores(){if(!members.length){alert('请先添加成员');return;}const bad=members.filter(m=>m.comment.length<50);if(bad.length){alert('评语不足50字：\n'+bad.map(m=>m.name).join('、'));return;}copyText('【业务维评分汇总】\n周期：'+document.getElementById('period-sel').value+'\n\n'+members.map(m=>{const t=Math.round(m.s1*.6+m.s2*.4);return m.name+'（'+m.group+'）：达成率 '+m.s1+' / 交付 '+m.s2+' / 综合 '+t+'\n  评语：'+m.comment}).join('\n\n'));}
+
+window.addEventListener('load',()=>setTimeout(syncAll,600));
+</script>
+</body>
+</html>
